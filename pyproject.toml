@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "astropy>=8.0.0",
+    "blackjax>=1.5",
+    "dustmaps>=1.0.14",
     "healpy>=1.19.0",
     "jax>=0.10.2",
     "jupyter>=1.1.1",
