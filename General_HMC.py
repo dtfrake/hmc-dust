@@ -68,7 +68,7 @@ def sample_hmc(
     return _, positions, momenta, accept_probs
 
 
-class HMCSampler:
+class HMCSamplerOld:
     def __init__(self, negative_logdensity, num_integration_steps=10, step_size=0.1, alpha=1.0, inv_mass_matrix=None):
         self.negative_logdensity = negative_logdensity
         self.num_integration_steps = num_integration_steps

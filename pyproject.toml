@@ -1,4 +1,4 @@
-[project]
+jax.jacobian(lambda xi: response(logscale, xi))(jnp.zeros_like(x))[project]
 name = "hmc-dust"
 version = "0.1.0"
 description = "Add your description here"

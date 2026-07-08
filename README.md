@@ -26,3 +26,21 @@ On a .py file if you do # %% you can create a cell that VScode will run on its o
     -chi_2 test of "real" data against the prior
 
 Actually comptue the covariance matrix of my posterior samples for the bannana problem and see how it works in the mass matrix
+
+7/6
+
+We can think of the momentum variable in HMC as "noise" in the overall potential energy V(q) instead of noise in just the position q. Adding noise in V(q) allows us to efficently explore ALL of the typical set (we are exploring a hypershell-shaped area centered at the mode instead of a small spherical area centered at q that misses most of the typical set)
+
+-Update the HMC class to return ALL the intermediate position steps
+
+-In HMC.run, you can add a keyword return_samples = True
+
+-Check to see if KL divergence increases linearly with number of dimensions
+
+-In lots of field inference problems, the chi_2 values using the posterior and the prior are both 1. Why? First of all, the chi_2 value using the posterior should (almost) always be 1 because, given that the prior is not unreasonably strong, the posterior should fit the data. If we let our sample space have way more dimensions (like 100000) than the number of data points we have, then the data
+mathematically cannot constrain our prior distribution that much because it only restricts a small number of directions
+
+-Better checks than just the KL divergence for a multivariate Gaussian: plot the diagonal of the unnormalized covariance matrix and compare with analytical posterior mean 
+-plot the mean of the samples and compare with the analytical posterior mean
+plot the KL divergence as a function of step size
+
