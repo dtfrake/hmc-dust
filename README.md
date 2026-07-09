@@ -44,3 +44,9 @@ mathematically cannot constrain our prior distribution that much because it only
 -plot the mean of the samples and compare with the analytical posterior mean
 plot the KL divergence as a function of step size
 
+-Task 7/8: Integrate P(d|s, f)P(f) to see if I get the same thing as P(d|s) with brute force (instead of the slick method showing it's a Gaussian with mean 0 and covariance RR^T + N)
+-Task 7/8: Try to write out what formulas HMC will allow us to calculate 
+
+P(xi | d) = P(d | xi)P(xi)/P(d)
+
+With HMC, we are able to take samples xi from the posterior. So, the integral of f(xi)P(xi | d)dxi is roughly sum of f(xi_sample)/
