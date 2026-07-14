@@ -49,4 +49,30 @@ plot the KL divergence as a function of step size
 
 P(xi | d) = P(d | xi)P(xi)/P(d)
 
-With HMC, we are able to take samples xi from the posterior. So, the integral of f(xi)P(xi | d)dxi is roughly sum of f(xi_sample)/
+With HMC, we are able to take samples xi from the posterior. So, the integral of f(xi)P(xi | d)dxi is roughly sum of f(xi_sample)
+
+Plot the marginal scale distrubtion from the HMC scale inference samples and then bin it to directly compute KL divergence
+Plot KL divergence vs step size again, but in every HMC sample vary the number of integration steps
+
+7/8: Next Steps: Use the RBF kernel to do inference on a 1D Gaussian process by Fourier transforming it. 
+My prior will be a unit Gaussian; I will have parameters in white noise. My reponse will include the Fourier Transform. I can take the Jacobian of it to get R
+
+Once I do this, it will be easy to transform to Matern. 
+Other tasks:
+
+-Perfect fitting scale
+-Play around with JVP and VJP instead of computing R direclty
+-Try to do inference on integrated/exponentiated dust 
+
+-Once I can do inference using a Matern kernel and fft, infter all three of the scale parameters (p, v, sigma) and then make marginal plots of them
+
+7/13
+
+-Plot real/imiginary parts of hartley transformation in 1d and confirm that you can understand the symmetry
+-NIFTY when it treats the variance as fixed can generate a random unnormalzied GP, divide by the integral of the power spectrum, and then mulitply by what the variance
+should be. This is useful when NIFTY is doing inference on flexible power spectrum. 
+
+-Plot the marginal scale distribution of my RBF scale inference and test KL divergence (done! it also works a lot better now)
+-Do the Matern inference, draw fake data from some actual matern, see if the heatmaps go around the truth
+    -If I shrink the error bars on the data and add more data points, the posterior should be able to perfectly recover what the truth actually is
+-Analytically grid the posterior
