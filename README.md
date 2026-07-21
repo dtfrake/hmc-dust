@@ -76,3 +76,11 @@ should be. This is useful when NIFTY is doing inference on flexible power spectr
 -Do the Matern inference, draw fake data from some actual matern, see if the heatmaps go around the truth
     -If I shrink the error bars on the data and add more data points, the posterior should be able to perfectly recover what the truth actually is
 -Analytically grid the posterior
+
+
+7/14
+
+-Plot: Where is the Hessian positive semidefinite?
+-Plot: The eigenvectors of the Hessian (at some arbitrary sampled points)
+-Test RMHMC: fix the Hessian 
+-Fisher metric: the "expected curvature" of the likelihood
