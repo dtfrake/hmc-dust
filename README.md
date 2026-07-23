@@ -81,6 +81,6 @@ should be. This is useful when NIFTY is doing inference on flexible power spectr
 7/14
 
 -Plot: Where is the Hessian positive semidefinite?
--Plot: The eigenvectors of the Hessian (at some arbitrary sampled points)
+-Plot: The eigenvectors of the Hessian (at some arbitrary sampled points) done!
 -Test RMHMC: fix the Hessian 
 -Fisher metric: the "expected curvature" of the likelihood
