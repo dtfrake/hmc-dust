@@ -124,3 +124,18 @@ outliers to still get a smooth field
 Potentially: Infer parallaxes, not distances
 The data points with unreasonbly high distance posterior mean aren't likely affecting the chi^2 for distance by much, as the chi^2
 is computed in parallax terms. Also, they can be filtered out by a stronger parallax err cut.
+
+8/13
+Inferring white noise between flexibilility and asperity is something to consider
+Integrating a field with power law spectrum; same as changing exponent by -1
+    -Integrated Wiener proccess and Wiener proccess have different degrees of smoothness
+    -Flexibility and asperity control how much of two differnent levels of smoothness go into the deviations from the power law
+    -Orinstein-Uhlenbeck proccess: A stationary version of the Wiener proccess (Then it actually has a covariance kernel)
+
+-Run a batch job testing HMC with different means and variances on the inverse gamma prior
+-Check by computing P(n | ext_obs, ext_true, sigma) for each extinction measurement by summing over all d_true (so that d_true gets marginalized out)
+    -Compare this to actually doing HMC runs where the n's are free parameters
+
+-Another thing: analytically compute the star location posteriors: P(x | w_obs, ext_obs, ext_curve_true). Build a likelihood function in this manner and do HMC on that.
+
+-Make a poster that summarizes the work I did with my name on it
