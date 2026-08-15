@@ -21,17 +21,19 @@ from jax.scipy.stats import t
 from jax.scipy.special import logsumexp
 from jax.scipy.special import gammaln
 from jax.scipy.stats import norm
-
-
+from jax.scipy.special import polygamma
+from jax.scipy.special import digamma
 
 
 INV_GAMMA_MEAN = 4
 INV_GAMMA_VAR  = 16
-#inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
-#inv_gamma_variance_prior_beta = INV_GAMMA_MEAN**3/INV_GAMMA_VAR + INV_GAMMA_MEAN
+inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
+inv_gamma_variance_prior_beta = INV_GAMMA_MEAN**3/INV_GAMMA_VAR + INV_GAMMA_MEAN
 
-inv_gamma_variance_prior_alpha = 1.5
-inv_gamma_variance_prior_beta = 2
+log_inv_gamma_var = polygamma(1, inv_gamma_variance_prior_alpha)
+log_inv_gamma_mean = jnp.log(inv_gamma_variance_prior_beta) - digamma(inv_gamma_variance_prior_alpha)
+
+
 
 from hmc_dust import DATA, GAIA
 
@@ -199,20 +201,22 @@ def mask_cov_diagonal(cov, indices_to_keep):
     M_diag[indices_to_keep] = cov_diag[indices_to_keep]
     return jnp.diag(M_diag)
 
-num_overall_steps = 20
+num_overall_steps = 5
 burn_in = 0
-num_integration_steps = 20
+num_integration_steps = 20000
 initial_step_size = 0.00006
 step_size = initial_step_size
-inv_mass_matrix = jnp.eye(num_fourier_dimensions + num_fitting_params + num_data)
+inv_mass_matrix = jnp.eye(num_fourier_dimensions + num_fitting_params + 2*num_data)
 
 num_initial_dims = num_fourier_dimensions + num_fitting_params
 indices_to_keep = np.concatenate([np.arange(0, 20), np.arange(num_initial_dims-20, num_initial_dims)])
-#inv_mass_matrix = mask_cov_diagonal(jnp.diag(jnp.asarray(np.load('inv_mass_matrix_Gaia_XP_fitting_actual_data.npy'))), indices_to_keep)
+
 
 ending_diag_values = x_error**2
-ending_indices = jnp.arange(num_fourier_dimensions + num_fitting_params, num_fourier_dimensions + num_fitting_params + num_data)
-inv_mass_matrix = inv_mass_matrix.at[ending_indices, ending_indices].set(ending_diag_values)
+middle_indices = jnp.arange(num_fourier_dimensions + num_fitting_params, num_fourier_dimensions + num_fitting_params + num_data)
+ending_indices = jnp.arange(num_fourier_dimensions + num_fitting_params + num_data, num_fourier_dimensions + num_fitting_params + 2*num_data)
+inv_mass_matrix = inv_mass_matrix.at[middle_indices, middle_indices].set(ending_diag_values)
+inv_mass_matrix = inv_mass_matrix.at[ending_indices, ending_indices].set(log_inv_gamma_var)
 
 
 initial_logvar = 4.0
@@ -313,27 +317,26 @@ def lognuprior(lognu):
 def logoffsetprior(offset):
     return -0.5*(offset - offset_prior_mean)**2
 
+# The pdf is (b^a)/(gamma(a)) * x^(-(a + 1))e^(-b/x). If we let y = log x, it becomes (b^a)/(gamma(a)) * e^(y(-a - 1)) * e(-b/e^y) * e^y = irrelevant constant * e^(-ay) * e^(-b/e^y). Taking the log gives the desired result.
+def inv_gamma_logpdf_input_log_x(log_x, alpha, beta):
+    return -alpha * log_x - beta*jnp.exp(-log_x)
 
 def negative_logdensity(x):
     logvar = x[0]
     lognu = x[1]
     offset = x[2]
-    xi = x[3:3 + num_fourier_dimensions]
-    r = x[3 + num_fourier_dimensions:]
-    # hardcoded r back to fixed values
-    #r = x_obs_true
+    xi = x[num_fitting_params:num_fitting_params + num_fourier_dimensions]
+    r = x[num_fitting_params + num_fourier_dimensions:num_fitting_params + num_fourier_dimensions + num_data]
+    log_r_var = x[num_fitting_params + num_fourier_dimensions + num_data:]
     inference_params = (logvar, lognu)
     # There are priors on everything: logvar, lognu, offset, xi, and r
-    negative_log_p_s = -logvarprior(logvar) - lognuprior(lognu) - logoffsetprior(offset) + 0.5*xi.T @ xi - jnp.sum(distance_logprior(r))
+    negative_log_p_s = -logvarprior(logvar) - lognuprior(lognu) - logoffsetprior(offset) + 0.5*xi.T @ xi - jnp.sum(distance_logprior(r)) - jnp.sum(inv_gamma_logpdf_input_log_x(log_r_var, inv_gamma_variance_prior_alpha, inv_gamma_variance_prior_beta))
     field_res = y_obs - response_function(xi, r, inference_params, offset)
     plx_res = plx_obs - dist_to_plx(r)
-
-    field_t_scores = field_res/ext_err[mask]
-    log_data_likelihoods = t.logpdf(field_t_scores, df = student_t_nu, loc = 0.0, scale = student_t_sigma)
-
-
+    field_z_scores = field_res/(data_ext_err*jnp.exp(log_r_var/2))
+    negative_log_ext_likelihood = 0.5*jnp.sum(field_z_scores**2) + 0.5*jnp.sum(log_r_var)
     # P(all data given field, params, distance) is now the probability of observing the extinctions (first term) times the probabilty of observing the correct distances (second term)
-    negative_log_p_d_given_s = -1*jnp.sum(log_data_likelihoods) + 0.5*plx_res.T @ inv_cov_plx_matrix @ plx_res
+    negative_log_p_d_given_s =  negative_log_ext_likelihood + 0.5*plx_res.T @ inv_cov_plx_matrix @ plx_res
     return negative_log_p_s + negative_log_p_d_given_s
 
 
@@ -343,6 +346,7 @@ if(doing_burn_in):
     initial_coordinates = initial_coordinates.at[1].set(initial_lognu)
     initial_coordinates = initial_coordinates.at[2].set(initial_offset)
     initial_coordinates = jnp.concatenate([initial_coordinates, x_obs])
+    initial_coordinates = jnp.concatenate([initial_coordinates, jnp.ones_like(x_obs)*log_inv_gamma_mean])
 else:
     initial_coordinates = jnp.asarray(np.load("last_position_Gaia_XP_fitting_actual_data.npy"))
 
@@ -350,7 +354,7 @@ else:
 num_good_samples = num_overall_steps - burn_in
 time_arr = jnp.arange(num_good_samples)
 
-
+x_bad = initial_coordinates.at[num_fitting_params + num_fourier_dimensions].set(-1.0)
 #%%
 rng = jr.PRNGKey(5)
 rng, k1, k2 = jr.split(rng, 3)
@@ -420,15 +424,20 @@ else :
 
 
 
-np.save(out('overall_data_Gaia_XP_fitting_actual_data.npy'), overall_data_arr)
-np.save(out('accept_prob_Gaia_XP_fitting_actual_data.npy'), accept_prob_arr)
+np.save(out('overall_data_infer_error_bars.npy'), overall_data_arr)
+np.save(out('accept_prob_infer_error_bars.npy'), accept_prob_arr)
 
 #%%
 logvars = overall_data_arr[:, 0]
 lognus = overall_data_arr[:, 1]
 offsets = overall_data_arr[:, 2]
 overall_extinction_arr = overall_data_arr[:, 3:3 + num_fourier_dimensions]  
-overall_star_location_arr = overall_data_arr[:, 3 + num_fourier_dimensions:]
+overall_star_location_arr = overall_data_arr[:, 3 + num_fourier_dimensions:3 + num_fourier_dimensions + num_data]
+log_overall_star_errorbar_arr = overall_data_arr[:, 3 + num_fourier_dimensions + num_data:]
+overall_star_errorbar_arr = jnp.exp(log_overall_star_errorbar_arr)
+
+
+
 
 mean_star_location_arr = overall_star_location_arr.mean(axis=0)
 logscales = jnp.zeros_like(logvars)
@@ -523,7 +532,7 @@ cov= jnp.cov(overall_data_arr, rowvar = False)
 
 
 fig, axes = plt.subplots(2, 3, figsize = (18, 10))
-timegrid = jnp.arange(num_fourier_dimensions + num_fitting_params + num_data)
+timegrid = jnp.arange(num_fourier_dimensions + num_fitting_params + 2*num_data)
 axes[0][0].plot(timegrid, jnp.diagonal(cov), color = "Green", alpha = 0.5)
 axes[0][0].set_title("Diagonal Covariance")
 axes[0][0].set_yscale("log")
@@ -558,7 +567,7 @@ if use_NUTS or use_blackjax_hmc:
 
 
 fig.tight_layout()
-fig.savefig(out("covariance_plots.png"), dpi=120, bbox_inches="tight")
+fig.savefig(out("covariance_plots_infer_error_bars.png"), dpi=120, bbox_inches="tight")
 #%%
 fig, axes = plt.subplots(12, 3, figsize = (24, 60))
 star_indices = jnp.arange(num_data)
@@ -682,6 +691,7 @@ for i in range (0, 3):
 
         prior_loglikes = inv_gamma_logpdf(errorbar_linspace, inv_gamma_variance_prior_alpha, inv_gamma_variance_prior_beta)
         prior_loglikes = jnp.exp(prior_loglikes)
+        lower_ax.hist(np.asarray(overall_star_errorbar_arr[:, star_index]), bins=500, range=(float(errorbar_linspace[0]), float(errorbar_linspace[-1])), density=True, alpha=0.4, color="purple", label="Sampled extinction errorbars")
         lower_ax.plot(errorbar_linspace, avg_errorbar_likelihoods, color = "green", label = "Analytical extinction errorbar posterior averaged over HMC samples")
         lower_ax.plot(errorbar_linspace, prior_loglikes, color = "blue", label = "Inverse Gamma extinction errorbar prior")
         lower_ax.legend(loc = "upper right")
@@ -723,7 +733,7 @@ axes[5][2].set_title("Offset Trace Plot")
 
 
 fig.tight_layout()
-fig.savefig(out("final_plots.png"), dpi=120, bbox_inches="tight")
+fig.savefig(out("final_plots_infer_error_bars.png"), dpi=120, bbox_inches="tight")
 
 
 posterior_samples = overall_data_arr[np.newaxis, :, :]  # add chain axis -> (1, num_samples, 50)

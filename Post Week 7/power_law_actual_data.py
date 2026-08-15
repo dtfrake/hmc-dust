@@ -347,8 +347,8 @@ else :
 
 
 
-np.save(out('overall_data_Gaia_XP_fitting_actual_data.npy'), overall_data_arr)
-np.save(out('accept_prob_Gaia_XP_fitting_actual_data.npy'), accept_prob_arr)
+np.save(out('overall_data_Gaia_XP_fitting_actual_data_power_law.npy'), overall_data_arr)
+np.save(out('accept_prob_Gaia_XP_fitting_actual_data_power_law.npy'), accept_prob_arr)
 
 #%%
 
@@ -417,9 +417,7 @@ if use_NUTS or use_blackjax_hmc:
 
 fig.tight_layout()
 
-fig.savefig(out("covariance_plots.png"), dpi=120, bbox_inches="tight")
-np.save(out('inv_mass_matrix_Gaia_XP_fitting_actual_data.npy'), inv_mass_matrix)
-np.save(out('cov_matrix_Gaia_XP_fitting_actual_data.npy'), cov)
+fig.savefig(out("covariance_plots_power_law.png"), dpi=120, bbox_inches="tight")
 #%%
 fig, axes = plt.subplots(8, 3, figsize = (24, 40))
 star_indices = jnp.arange(num_data)
@@ -549,7 +547,7 @@ axes[4][1].set_title("Offset Trace Plot")
 
 fig.tight_layout()
 
-fig.savefig(out("final_plots.png"), dpi=120, bbox_inches="tight")
+fig.savefig(out("final_plots_power_law.png"), dpi=120, bbox_inches="tight")
 
 posterior_samples = overall_data_arr[np.newaxis, :, :]  # add chain axis -> (1, num_samples, 50)
 

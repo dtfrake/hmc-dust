@@ -11,7 +11,7 @@ import arviz as az
 import jax.scipy.special as jss
 from functools import partial
 # Import the custom package you generated
-from Better_HMC import HMCSampler 
+from hmc_dust.better_hmc import HMCSampler 
 import matplotlib.pyplot as plt
 jax.config.update("jax_enable_x64", True)
 #
@@ -211,4 +211,4 @@ else :
 cov= jnp.cov(overall_data_arr, rowvar = False)
 np.save("truncated_power_law_overall_data_arr_output.npy", overall_data_arr)
 np.save("truncated_power_law_accept_prob_arr_output.npy", accept_prob_arr)
-np.save("truncated_power_law_cov_matrix_output.npy", cov)
+#%%
