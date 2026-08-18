@@ -201,8 +201,8 @@ def mask_cov_diagonal(cov, indices_to_keep):
     M_diag[indices_to_keep] = cov_diag[indices_to_keep]
     return jnp.diag(M_diag)
 
-num_overall_steps = 5
-burn_in = 0
+num_overall_steps = 550
+burn_in = 50
 num_integration_steps = 20000
 initial_step_size = 0.00006
 step_size = initial_step_size
@@ -605,8 +605,8 @@ axes[0][0].set_xlabel("log(Variance)")
 axes[0][0].set_ylabel("log(Nu)")
 
 for i in range (0, 10):
-    axes[0][2].plot(dust_x_linspace, overall_extinction_arr_exp[50*i, :], color = "teal", alpha = 0.3)
-    axes[0][1].plot(dust_x_linspace, overall_extinction_arr_raw[50*i, :], color = "teal", alpha = 0.3)
+    axes[0][2].plot(dust_x_linspace, overall_extinction_arr_exp[5*i, :], color = "teal", alpha = 0.3)
+    axes[0][1].plot(dust_x_linspace, overall_extinction_arr_raw[5*i, :], color = "teal", alpha = 0.3)
 
 
 axes[0][1].plot(dust_x_linspace, mean_extinction_raw, color = "orange", alpha = 1, label = "HMC mean log differential extinction")

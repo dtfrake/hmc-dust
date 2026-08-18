@@ -105,6 +105,8 @@ num_fourier_dimensions = 1200
 left_distance_padding = 40
 right_distance_padding = 600
 
+initial_offset = -7.6
+
 inv_gamma_variance_prior_alpha = 1.5
 inv_gamma_variance_prior_beta = 2
 student_t_sigma = jnp.sqrt(inv_gamma_variance_prior_beta/inv_gamma_variance_prior_alpha)
@@ -269,6 +271,7 @@ def negative_logdensity(x):
 
 if(doing_burn_in):
     initial_coordinates = jnp.zeros(num_fourier_dimensions + num_fitting_params + 1) 
+    initial_coordinates.at[4].set(initial_offset)
     initial_coordinates = jnp.concatenate([initial_coordinates, x_obs])
 else:
     initial_coordinates = jnp.asarray(np.load("last_position_Gaia_XP_fitting_actual_data.npy"))

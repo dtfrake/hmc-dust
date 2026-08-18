@@ -21,35 +21,27 @@ from jax.scipy.stats import t
 from jax.scipy.special import logsumexp
 from jax.scipy.special import gammaln
 from jax.scipy.stats import norm
+from jax.scipy.special import polygamma
+from jax.scipy.special import digamma
 
 
-INV_GAMMA_MEAN = float(os.environ.get("IG_MEAN", 4))
-INV_GAMMA_VAR  = float(os.environ.get("IG_VAR", 16))
+INV_GAMMA_MEAN = 4
+INV_GAMMA_VAR  = 16
 inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
 inv_gamma_variance_prior_beta = INV_GAMMA_MEAN**3/INV_GAMMA_VAR + INV_GAMMA_MEAN
 
-#INV_GAMMA_MEAN = 4
-#INV_GAMMA_VAR  = 16
-#inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
-#inv_gamma_variance_prior_beta = INV_GAMMA_MEAN**3/INV_GAMMA_VAR + INV_GAMMA_MEAN
+log_inv_gamma_var = polygamma(1, inv_gamma_variance_prior_alpha)
+log_inv_gamma_mean = jnp.log(inv_gamma_variance_prior_beta) - digamma(inv_gamma_variance_prior_alpha)
 
-#inv_gamma_variance_prior_alpha = 1.5
-#inv_gamma_variance_prior_alpha = float(os.environ.get("IG_ALPHA", 1.5))
-#inv_gamma_variance_prior_beta = 2
-#inv_gamma_variance_prior_beta = 2
+
 
 from hmc_dust import DATA, GAIA
 
 RUN = os.environ.get("SLURM_JOB_ID", "local")
 
-#def out(name):
-    #root, ext = os.path.splitext(name)
-    #return f"{root}_{RUN}{ext}"
-
-
 def out(name):
     root, ext = os.path.splitext(name)
-    return f"{root}_mean{INV_GAMMA_MEAN:g}_var{INV_GAMMA_VAR:g}_{RUN}{ext}"
+    return f"{root}_{RUN}{ext}"
 
 fits_table = Table.read(GAIA / "gc_sightline.fits")
 
@@ -209,20 +201,22 @@ def mask_cov_diagonal(cov, indices_to_keep):
     M_diag[indices_to_keep] = cov_diag[indices_to_keep]
     return jnp.diag(M_diag)
 
-num_overall_steps = 550
-burn_in = 50
+num_overall_steps = 600
+burn_in = 100
 num_integration_steps = 20000
 initial_step_size = 0.00006
 step_size = initial_step_size
-inv_mass_matrix = jnp.eye(num_fourier_dimensions + num_fitting_params + num_data)
+inv_mass_matrix = jnp.eye(num_fourier_dimensions + num_fitting_params + 2*num_data)
 
 num_initial_dims = num_fourier_dimensions + num_fitting_params
 indices_to_keep = np.concatenate([np.arange(0, 20), np.arange(num_initial_dims-20, num_initial_dims)])
-#inv_mass_matrix = mask_cov_diagonal(jnp.diag(jnp.asarray(np.load('inv_mass_matrix_Gaia_XP_fitting_actual_data.npy'))), indices_to_keep)
+
 
 ending_diag_values = x_error**2
-ending_indices = jnp.arange(num_fourier_dimensions + num_fitting_params, num_fourier_dimensions + num_fitting_params + num_data)
-inv_mass_matrix = inv_mass_matrix.at[ending_indices, ending_indices].set(ending_diag_values)
+middle_indices = jnp.arange(num_fourier_dimensions + num_fitting_params, num_fourier_dimensions + num_fitting_params + num_data)
+ending_indices = jnp.arange(num_fourier_dimensions + num_fitting_params + num_data, num_fourier_dimensions + num_fitting_params + 2*num_data)
+inv_mass_matrix = inv_mass_matrix.at[middle_indices, middle_indices].set(ending_diag_values)
+inv_mass_matrix = inv_mass_matrix.at[ending_indices, ending_indices].set(log_inv_gamma_var)
 
 
 initial_logvar = 4.0
@@ -259,15 +253,6 @@ def inv_gamma_logpdf(x, alpha, beta):
         alpha * jnp.log(beta) - gammaln(alpha) - (alpha + 1.0) * jnp.log(x) - beta / x,
         -jnp.inf,
     )
-
-def inv_gamma_logpdf(x, alpha, beta):
-    # β^α / Γ(α) * x^(-α-1) * exp(-β/x),  x > 0
-    return jnp.where(
-        x > 0,
-        alpha * jnp.log(beta) - gammaln(alpha) - (alpha + 1.0) * jnp.log(x) - beta / x,
-        -jnp.inf,
-    )
-
 
 def exponentiated_integrated_density(logdensity):
     density = jnp.exp(logdensity)
@@ -323,122 +308,53 @@ def lognuprior(lognu):
 def logoffsetprior(offset):
     return -0.5*(offset - offset_prior_mean)**2
 
+# The pdf is (b^a)/(gamma(a)) * x^(-(a + 1))e^(-b/x). If we let y = log x, it becomes (b^a)/(gamma(a)) * e^(y(-a - 1)) * e(-b/e^y) * e^y = irrelevant constant * e^(-ay) * e^(-b/e^y). Taking the log gives the desired result.
+def inv_gamma_logpdf_input_log_x(log_x, alpha, beta):
+    return -alpha * log_x - beta*jnp.exp(-log_x)
 
 def negative_logdensity(x):
     logvar = x[0]
     lognu = x[1]
     offset = x[2]
-    xi = x[3:3 + num_fourier_dimensions]
-    r = x[3 + num_fourier_dimensions:]
-    # hardcoded r back to fixed values
-    #r = x_obs_true
+    xi = x[num_fitting_params:num_fitting_params + num_fourier_dimensions]
+    r = x[num_fitting_params + num_fourier_dimensions:num_fitting_params + num_fourier_dimensions + num_data]
+    log_r_var = x[num_fitting_params + num_fourier_dimensions + num_data:]
     inference_params = (logvar, lognu)
     # There are priors on everything: logvar, lognu, offset, xi, and r
-    negative_log_p_s = -logvarprior(logvar) - lognuprior(lognu) - logoffsetprior(offset) + 0.5*xi.T @ xi - jnp.sum(distance_logprior(r))
+    negative_log_p_s = -logvarprior(logvar) - lognuprior(lognu) - logoffsetprior(offset) + 0.5*xi.T @ xi - jnp.sum(distance_logprior(r)) - jnp.sum(inv_gamma_logpdf_input_log_x(log_r_var, inv_gamma_variance_prior_alpha, inv_gamma_variance_prior_beta))
     field_res = y_obs - response_function(xi, r, inference_params, offset)
     plx_res = plx_obs - dist_to_plx(r)
-
-    field_t_scores = field_res/ext_err[mask]
-    log_data_likelihoods = t.logpdf(field_t_scores, df = student_t_nu, loc = 0.0, scale = student_t_sigma)
-
-
+    field_z_scores = field_res/(data_ext_err*jnp.exp(log_r_var/2))
+    negative_log_ext_likelihood = 0.5*jnp.sum(field_z_scores**2) + 0.5*jnp.sum(log_r_var)
     # P(all data given field, params, distance) is now the probability of observing the extinctions (first term) times the probabilty of observing the correct distances (second term)
-    negative_log_p_d_given_s = -1*jnp.sum(log_data_likelihoods) + 0.5*plx_res.T @ inv_cov_plx_matrix @ plx_res
+    negative_log_p_d_given_s =  negative_log_ext_likelihood + 0.5*plx_res.T @ inv_cov_plx_matrix @ plx_res
     return negative_log_p_s + negative_log_p_d_given_s
 
-
-if(doing_burn_in):
-    initial_coordinates = jnp.zeros(num_fourier_dimensions + num_fitting_params) 
-    initial_coordinates = initial_coordinates.at[0].set(initial_logvar)
-    initial_coordinates = initial_coordinates.at[1].set(initial_lognu)
-    initial_coordinates = initial_coordinates.at[2].set(initial_offset)
-    initial_coordinates = jnp.concatenate([initial_coordinates, x_obs])
-else:
-    initial_coordinates = jnp.asarray(np.load("last_position_Gaia_XP_fitting_actual_data.npy"))
 
 # Size of initial coordinates: num_fourier_dimensions + num_fitting_params + num_data
 num_good_samples = num_overall_steps - burn_in
 time_arr = jnp.arange(num_good_samples)
 
 
-#%%
-rng = jr.PRNGKey(5)
-rng, k1, k2 = jr.split(rng, 3)
-logdensity_fn = lambda x: -negative_logdensity(x)
-if(use_NUTS):
-        def inference_loop(rng_key, kernel, initial_state, num_samples):
-            @jax.jit
-            def one_step(state, key):
-                state, info = kernel(key, state)
-                return state, (state, info)
-            keys = jr.split(rng_key, num_samples)
-            _, (states, infos) = jax.lax.scan(one_step, initial_state, keys)
-            return states, infos
-        warmup = blackjax.window_adaptation(blackjax.nuts, logdensity_fn, is_mass_matrix_diagonal= not window_adapt_square_mass_matrix, initial_inverse_mass_matrix=jnp.diagonal(inv_mass_matrix),   imm_shrinkage_to_previous=0.0)
-        (state, parameters), _ = warmup.run(k1, initial_coordinates, num_steps=burn_in)
-        nuts = blackjax.nuts(logdensity_fn, **parameters)
-        initial_state = state
-
-        states, infos = inference_loop(k2, nuts.step, initial_state, num_good_samples)
-
-        overall_data_arr = states.position
-        accept_prob_arr  = infos.acceptance_rate
-elif use_blackjax_hmc:
-    def inference_loop(rng_key, kernel, initial_state, num_samples):
-        @jax.jit
-        def one_step(state, key):
-            state, info = kernel(key, state)
-            return state, (state, info)
-        keys = jr.split(rng_key, num_samples)
-        _, (states, infos) = jax.lax.scan(one_step, initial_state, keys)
-        return states, infos
-
-    # HMC needs num_integration_steps; pass it through window_adaptation.
-    warmup = blackjax.window_adaptation(
-        blackjax.hmc, logdensity_fn,
-        num_integration_steps=num_integration_steps,
-        is_mass_matrix_diagonal=not window_adapt_square_mass_matrix,
-        initial_inverse_mass_matrix=jnp.diagonal(inv_mass_matrix),  
-        imm_shrinkage_to_previous=0.0
-    )
-    (state, parameters), _ = warmup.run(k1, initial_coordinates, num_steps=burn_in)
-
-    # ...and again when building the tuned kernel.
-    hmc = blackjax.hmc(logdensity_fn, **parameters)
-    initial_state = state
-
-    states, infos = inference_loop(k2, hmc.step, initial_state, num_good_samples)
-
-    overall_data_arr = states.position
-    accept_prob_arr  = infos.acceptance_rate
-else :
-    sampler = HMCSampler(
-        negative_logdensity= negative_logdensity,
-        num_integration_steps =  num_integration_steps,
-        step_size= step_size,
-        inv_mass_matrix = inv_mass_matrix,
-        #inv_mass_matrix = jnp.diag(jnp.array(np.load('blackjax_cov_matrix.npy'))),
-        alpha=1.0
-    )
-    print("HMC set up!")
-    overall_data_arr, overall_momentum_arr, accept_prob_arr = sampler.sample(
-        start_position=initial_coordinates, 
-        num_samples=num_overall_steps,
-        burn_in = burn_in,
-        rng_key=rng
-    )
 
 
 
-np.save(out('overall_data_Gaia_XP_fitting_actual_data.npy'), overall_data_arr)
-np.save(out('accept_prob_Gaia_XP_fitting_actual_data.npy'), accept_prob_arr)
+
 
 #%%
+
+overall_data_arr = jnp.asarray(np.load('runs/overall_data_infer_error_bars_39408085.npy'))
+accept_prob_arr = jnp.zeros_like(overall_data_arr[0])
 logvars = overall_data_arr[:, 0]
 lognus = overall_data_arr[:, 1]
 offsets = overall_data_arr[:, 2]
 overall_extinction_arr = overall_data_arr[:, 3:3 + num_fourier_dimensions]  
-overall_star_location_arr = overall_data_arr[:, 3 + num_fourier_dimensions:]
+overall_star_location_arr = overall_data_arr[:, 3 + num_fourier_dimensions:3 + num_fourier_dimensions + num_data]
+log_overall_star_errorbar_arr = overall_data_arr[:, 3 + num_fourier_dimensions + num_data:]
+overall_star_errorbar_arr = jnp.exp(log_overall_star_errorbar_arr)
+
+
+
 
 mean_star_location_arr = overall_star_location_arr.mean(axis=0)
 logscales = jnp.zeros_like(logvars)
@@ -469,7 +385,7 @@ cov= jnp.cov(overall_data_arr, rowvar = False)
 errorbar_linspace = jnp.arange(5000)*0.02 + 0.02
 def exact_errorbar_loglike(errorbar_mul, ext_true, ext_obs, sigma):
     logprior = inv_gamma_logpdf(errorbar_mul, inv_gamma_variance_prior_alpha, inv_gamma_variance_prior_beta)
-    log_p_ext_obs = norm.logpdf(ext_obs, loc=ext_true, scale=sigma * jnp.sqrt(errorbar_mul))
+    log_p_ext_obs = -0.5*((ext_obs - ext_true)/(sigma*jnp.sqrt(errorbar_mul)))**2 - jnp.log(sigma*jnp.sqrt(errorbar_mul))
     return logprior + log_p_ext_obs
 
 def average_errorbar_loglike(errorbar_mul, ext_true_arr, ext_obs, sigma):
@@ -504,9 +420,9 @@ log_x = (distance_logprior(r_grid)[:, None]
 
 
 @jax.jit
-def accumulate(fields):                      # fields: [N_samples, num_dimensions]
+def accumulate(fields):                      
     def body(acc, field):
-        ext_true = field[idx]                                     # [P]
+        ext_true = field[idx]                                    
         tscore = (y_obs[None, :] - ext_true[:, None]) / data_ext_err[None, :]
         ll = t.logpdf(tscore, df=student_t_nu, loc=0.0, scale=student_t_sigma) + log_x
         return jnp.logaddexp(acc, ll), None
@@ -517,62 +433,15 @@ def accumulate(fields):                      # fields: [N_samples, num_dimension
 
 log_mean = accumulate(overall_extinction_arr_exp)
 
-
-
-
 star_posterior_2d = jnp.exp(log_mean)          
 dx = integrating_dust_x_linspace[1] - integrating_dust_x_linspace[0]
 star_posterior_2d /= (star_posterior_2d.sum(axis=0, keepdims=True) * dx)
-
-
 x = integrating_dust_x_linspace[:star_posterior_2d.shape[0]]
-mean_star_location_arr_analytic = (x @ star_posterior_2d) / star_posterior_2d.sum(axis=0)   # [NUM_STARS]
-
-
-cov= jnp.cov(overall_data_arr, rowvar = False)
-
-
-fig, axes = plt.subplots(2, 3, figsize = (18, 10))
-timegrid = jnp.arange(num_fourier_dimensions + num_fitting_params + num_data)
-axes[0][0].plot(timegrid, jnp.diagonal(cov), color = "Green", alpha = 0.5)
-axes[0][0].set_title("Diagonal Covariance")
-axes[0][0].set_yscale("log")
-axes[0][2].plot(jnp.arange(data_plx_err.size), x_error**2)
-C = np.asarray(cov)
-off = C - np.diag(np.diag(C))
-vmax = np.abs(off).max()         # symmetric limits so white = 0
-im = axes[0][1].imshow(C, cmap='RdBu_r', vmin= -vmax, vmax=vmax)
-fig.colorbar(im, ax=axes[0][1], label='covariance')
-axes[0][1].set_title('Posterior covariance')
-axes[0][1].set_xlabel('parameter index')
-axes[0][1].set_ylabel('parameter index')
-
-
-
-
-if use_NUTS or use_blackjax_hmc:
-    step_size = parameters['step_size']
-    inv_mass_matrix = parameters['inverse_mass_matrix']   # not 'inv_mass_matrix'
-    if(window_adapt_square_mass_matrix):
-        C = np.asarray(inv_mass_matrix)
-        off = C - np.diag(np.diag(C))
-        vmax = np.abs(off).max()        
-        im = axes[1][0].imshow(jnp.log(C), cmap='RdBu_r', vmin= -vmax, vmax=vmax)
-        axes[1][0].colorbar(im, ax=axes[0], label='covariance')
-        axes[1][0].set_title('Posterior covariance')
-        axes[1][0].set_xlabel('parameter index')
-        axes[1][0].set_ylabel('parameter index')
-        axes[1][1].plot(jnp.arange(jnp.diagonal(inv_mass_matrix)).size, inv_mass_matrix)
-    else :
-        axes[1][0].plot(jnp.arange(inv_mass_matrix.size), inv_mass_matrix)
-
-
-fig.tight_layout()
-fig.savefig(out("covariance_plots.png"), dpi=120, bbox_inches="tight")
+mean_star_location_arr_analytic = (x @ star_posterior_2d) / star_posterior_2d.sum(axis=0)   
 #%%
-fig, axes = plt.subplots(12, 3, figsize = (24, 60))
+fig, axes = plt.subplots(15, 3, figsize = (24, 75))
 star_indices = jnp.arange(num_data)
-star_mask = x_obs < 1400
+star_mask = x_obs > 0
 star_indices = star_indices[star_mask]
 samples_to_highlight = [10, 20, 30]
 
@@ -606,8 +475,8 @@ axes[0][0].set_xlabel("log(Variance)")
 axes[0][0].set_ylabel("log(Nu)")
 
 for i in range (0, 10):
-    axes[0][2].plot(dust_x_linspace, overall_extinction_arr_exp[50*i, :], color = "teal", alpha = 0.3)
-    axes[0][1].plot(dust_x_linspace, overall_extinction_arr_raw[50*i, :], color = "teal", alpha = 0.3)
+    axes[0][2].plot(dust_x_linspace, overall_extinction_arr_exp[5*i, :], color = "teal", alpha = 0.3)
+    axes[0][1].plot(dust_x_linspace, overall_extinction_arr_raw[5*i, :], color = "teal", alpha = 0.3)
 
 
 axes[0][1].plot(dust_x_linspace, mean_extinction_raw, color = "orange", alpha = 1, label = "HMC mean log differential extinction")
@@ -680,10 +549,11 @@ for i in range (0, 3):
     for j in range (0, 3):
         ax = axes[6 + j][i]
         lower_ax = axes[9 + j][i]
+        second_lower_ax = axes[12 + j][i]
         star_index = star_indices[i + 3*j]
         ext_obs_at_star = y_obs[star_index]
-        ext_field_at_star_arr = jax.vmap(jnp.interp, in_axes=(None, None, 0))(
-            x_obs[star_index], dust_x_linspace, overall_extinction_arr_exp
+        ext_field_at_star_arr = jax.vmap(jnp.interp, in_axes=(0, None, 0))(
+            overall_star_location_arr[:, star_index], dust_x_linspace, overall_extinction_arr_exp
         )
         avg_errorbar_loglikes = jax.vmap(average_errorbar_loglike, in_axes = (0, None, None, None))(errorbar_linspace, ext_field_at_star_arr, ext_obs_at_star, data_ext_err[star_index])
         avg_errorbar_likelihoods = jnp.exp(avg_errorbar_loglikes - jnp.max(avg_errorbar_loglikes))
@@ -692,9 +562,14 @@ for i in range (0, 3):
 
         prior_loglikes = inv_gamma_logpdf(errorbar_linspace, inv_gamma_variance_prior_alpha, inv_gamma_variance_prior_beta)
         prior_loglikes = jnp.exp(prior_loglikes)
+        lower_ax.hist(np.asarray(overall_star_errorbar_arr[:, star_index]), bins=500, range=(float(errorbar_linspace[0]), float(errorbar_linspace[-1])), density=True, alpha=0.4, color="purple", label="Sampled extinction errorbars")
         lower_ax.plot(errorbar_linspace, avg_errorbar_likelihoods, color = "green", label = "Analytical extinction errorbar posterior averaged over HMC samples")
         lower_ax.plot(errorbar_linspace, prior_loglikes, color = "blue", label = "Inverse Gamma extinction errorbar prior")
         lower_ax.legend(loc = "upper right")
+
+        second_lower_ax.plot(time_arr, (ext_field_at_star_arr - ext_obs_at_star)/data_ext_err[star_index], color = "orange")
+        second_lower_ax.set_xlabel("HMC Trial Number")
+        second_lower_ax.set_title(f"z-score for observed extinction for star {star_index} assuming variance mulitplier is 1")
 
         ax.plot(integrating_dust_x_linspace, star_posterior_2d[:, star_index], color = "pink", zorder = 100, label = "Analytical position posterior given parallax AND extinction")
         ax.hist(overall_star_location_arr[:, star_index], bins=30, edgecolor="black", density=True, label="Histogram of HMC position posterior samples (normalized)")
@@ -733,7 +608,7 @@ axes[5][2].set_title("Offset Trace Plot")
 
 
 fig.tight_layout()
-fig.savefig(out("final_plots.png"), dpi=120, bbox_inches="tight")
+fig.savefig(out("final_plots_infer_error_bars.png"), dpi=120, bbox_inches="tight")
 
 
 posterior_samples = overall_data_arr[np.newaxis, :, :]  # add chain axis -> (1, num_samples, 50)
