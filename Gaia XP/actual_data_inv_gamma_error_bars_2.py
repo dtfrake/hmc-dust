@@ -24,11 +24,10 @@ from jax.scipy.stats import norm
 
 
 
-INV_GAMMA_MEAN = 9.0
-INV_GAMMA_VAR  = 81.0
-inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
-inv_gamma_variance_prior_beta  = INV_GAMMA_MEAN**3/INV_GAMMA_VAR + INV_GAMMA_MEAN
-
+#INV_GAMMA_MEAN = 9.0
+#INV_GAMMA_VAR  = 81.0
+inv_gamma_variance_prior_alpha = jnp.exp(0.1251910775899887)
+inv_gamma_variance_prior_beta  = jnp.exp(1.294155478477478)
 #INV_GAMMA_MEAN = float(os.environ.get("IG_MEAN", 4))
 #INV_GAMMA_VAR  = float(os.environ.get("IG_VAR", 16))
 #inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
@@ -752,6 +751,8 @@ for label, idx in indices_of_interest.items():
     print(f"ESS for {label} parameter (index {idx}): {ess_val}")
 
 
+print(f"inv_gamma alpha: {inv_gamma_variance_prior_alpha} beta: {inv_gamma_variance_prior_beta} "
+      f"-> student_t nu: {student_t_nu} sigma: {student_t_sigma}")
 print(f"Use NUTS? {use_NUTS} Use blackjax HMC? {use_blackjax_hmc} Initial Step Size: {initial_step_size} Step Size: {step_size} Num integration steps (only valid if no NUTS) {num_integration_steps} Burn in: {burn_in}")
 print(f"Average acceptance probability (acceptance rate) is: {jnp.average(accept_prob_arr)}")
 print(f"Num dimensions: {num_dimensions} Num data: {num_data} Total length: {max_distance - min_distance} Noise on each point: {error_bars_on_data} Num HMC trials: {num_overall_steps}")

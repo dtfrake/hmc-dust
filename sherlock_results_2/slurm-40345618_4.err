@@ -1,0 +1,13 @@
+/home/users/dtfrake/hmc-dust/.venv/lib/python3.12/site-packages/dustmaps/config.py:74: ConfigWarning: Configuration file not found:
+
+    /home/users/dtfrake/.dustmapsrc
+
+To create a new configuration file in the default location, run the following python code:
+
+    from dustmaps.config import config
+    config.reset()
+
+Note that this will delete your configuration! For example, if you have specified a data directory, then dustmaps will forget about its location.
+  warn(('Configuration file not found:\n\n'
+/home/users/dtfrake/hmc-dust/.venv/lib/python3.12/site-packages/jaxopt/_src/osqp.py:299: SyntaxWarning: invalid escape sequence '\m'
+  """Operator Splitting Solver for Quadratic Programs.

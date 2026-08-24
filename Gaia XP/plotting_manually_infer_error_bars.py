@@ -343,7 +343,7 @@ time_arr = jnp.arange(num_good_samples)
 
 #%%
 
-overall_data_arr = jnp.asarray(np.load('runs/overall_data_infer_error_bars_39408085.npy'))
+overall_data_arr = jnp.asarray(np.load('sherlock_results/overall_data_infer_error_bars_39520361.npy'))
 accept_prob_arr = jnp.zeros_like(overall_data_arr[0])
 logvars = overall_data_arr[:, 0]
 lognus = overall_data_arr[:, 1]
@@ -608,7 +608,7 @@ axes[5][2].set_title("Offset Trace Plot")
 
 
 fig.tight_layout()
-fig.savefig(out("final_plots_infer_error_bars.png"), dpi=120, bbox_inches="tight")
+fig.savefig("final_plots_infer_error_bars_39520361.png", dpi=120, bbox_inches="tight")
 
 
 posterior_samples = overall_data_arr[np.newaxis, :, :]  # add chain axis -> (1, num_samples, 50)
