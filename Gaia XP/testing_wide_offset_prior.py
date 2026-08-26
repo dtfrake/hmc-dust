@@ -1,5 +1,6 @@
 #%%
 import os
+from pathlib import Path
 import jax
 from astropy.table import Table
 import numpy as np
@@ -13,7 +14,7 @@ import astropy as ap
 from astropy.coordinates import SkyCoord
 import jax.random as jr
 from astropy.io import fits
-from hmc_dust.better_hmc import HMCSampler 
+from hmc_dust.better_hmc import HMCSampler
 import jax.scipy.special as jss
 import arviz as az
 import blackjax
@@ -22,33 +23,33 @@ from jax.scipy.special import logsumexp
 from jax.scipy.special import gammaln
 from jax.scipy.stats import norm
 
-
-
-#INV_GAMMA_MEAN = 9.0
-#INV_GAMMA_VAR  = 81.0
-inv_gamma_variance_prior_alpha = jnp.exp(0.1251910775899887)
-inv_gamma_variance_prior_beta  = jnp.exp(1.294155478477478)
-#INV_GAMMA_MEAN = float(os.environ.get("IG_MEAN", 4))
-#INV_GAMMA_VAR  = float(os.environ.get("IG_VAR", 16))
-#inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
-#inv_gamma_variance_prior_beta = INV_GAMMA_MEAN**3/INV_GAMMA_VAR + INV_GAMMA_MEAN
-
-#inv_gamma_variance_prior_alpha = 1.5
-#inv_gamma_variance_prior_alpha = float(os.environ.get("IG_ALPHA", 1.5))
-#inv_gamma_variance_prior_beta = 2
-
 from hmc_dust import DATA, GAIA
 
-CHAIN = int(os.environ.get("SLURM_ARRAY_TASK_ID", 0))
-RUN = os.environ.get("SLURM_ARRAY_JOB_ID", os.environ.get("SLURM_JOB_ID", "local"))
+# ----------------------------------------------------------------- run config
+# Everything that used to come from SLURM array env vars now lives here.
+SEED = 5                 # RNG seed for this run
+RUN_TAG = ""             # optional label for output filenames, e.g. "test1"
+OUTPUT_DIR = Path(".")   # where .npy / .png outputs land
+SHOW_PLOTS = True        # True when running interactively, False when headless
+
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def out(name):
+    """Build the output path for this run."""
     root, ext = os.path.splitext(name)
-    return f"{root}_{RUN}_chain{CHAIN}{ext}"
+    suffix = f"_{RUN_TAG}" if RUN_TAG else ""
+    return str(OUTPUT_DIR / f"{root}{suffix}{ext}")
 
-#def out(name):
-    #root, ext = os.path.splitext(name)
-    #return f"{root}_mean{INV_GAMMA_MEAN:g}_var{INV_GAMMA_VAR:g}_{RUN}{ext}"
+
+# ------------------------------------------------------------- prior settings
+inv_gamma_variance_prior_alpha = jnp.exp(0.1251910775899887)
+inv_gamma_variance_prior_beta = jnp.exp(1.294155478477478)
+
+# Offset is now multiplied by this in the response function
+OFFSET_MUL = 10
+
+
 
 fits_table = Table.read(GAIA / "gc_sightline.fits")
 
@@ -208,10 +209,10 @@ def mask_cov_diagonal(cov, indices_to_keep):
     M_diag[indices_to_keep] = cov_diag[indices_to_keep]
     return jnp.diag(M_diag)
 
-num_overall_steps = 1100
-burn_in = 100
-num_integration_steps = 3000
-initial_step_size = 0.0004
+num_overall_steps = 300
+burn_in = 50
+num_integration_steps = 25000
+initial_step_size = 0.00005
 step_size = initial_step_size
 inv_mass_matrix = jnp.eye(num_fourier_dimensions + num_fitting_params + num_data)
 
@@ -226,11 +227,11 @@ inv_mass_matrix = inv_mass_matrix.at[ending_indices, ending_indices].set(ending_
 
 initial_logvar = 4.0
 initial_lognu = 0
-initial_offset = -7.6
+initial_offset = -0.76
 
 logvar_prior_mean = initial_logvar
 lognu_prior_mean = 0.0
-offset_prior_mean = initial_offset
+offset_prior_mean = 0.0
 
 fixed_logscale = jnp.log(2*(max_distance - min_distance))
 
@@ -259,14 +260,6 @@ def inv_gamma_logpdf(x, alpha, beta):
         -jnp.inf,
     )
 
-def inv_gamma_logpdf(x, alpha, beta):
-    # β^α / Γ(α) * x^(-α-1) * exp(-β/x),  x > 0
-    return jnp.where(
-        x > 0,
-        alpha * jnp.log(beta) - gammaln(alpha) - (alpha + 1.0) * jnp.log(x) - beta / x,
-        -jnp.inf,
-    )
-
 
 def exponentiated_integrated_density(logdensity):
     density = jnp.exp(logdensity)
@@ -274,7 +267,7 @@ def exponentiated_integrated_density(logdensity):
 
 
 def response_function(xi, r, inference_params, offset):
-    field = fft_field_hartley(xi, inference_params) + offset
+    field = fft_field_hartley(xi, inference_params) + offset*OFFSET_MUL
     exp_int_field = exponentiated_integrated_density(field)
     return jnp.interp(r, dust_x_linspace, exp_int_field)
 
@@ -363,8 +356,7 @@ time_arr = jnp.arange(num_good_samples)
 
 
 #%%
-rng = jr.fold_in(jr.PRNGKey(5), CHAIN)
-rng, k1, k2 = jr.split(rng, 3)
+rng = jr.PRNGKey(SEED)
 rng, k1, k2 = jr.split(rng, 3)
 logdensity_fn = lambda x: -negative_logdensity(x)
 if(use_NUTS):
@@ -430,15 +422,12 @@ else :
         rng_key=rng
     )
 
-
-
-np.save(out('overall_data_Gaia_XP_fitting_actual_data.npy'), overall_data_arr)
-np.save(out('accept_prob_Gaia_XP_fitting_actual_data.npy'), accept_prob_arr)
+np.save(out('overall_data_wide_offset.npy'), overall_data_arr)
 
 #%%
 logvars = overall_data_arr[:, 0]
 lognus = overall_data_arr[:, 1]
-offsets = overall_data_arr[:, 2]
+offsets = overall_data_arr[:, 2]*OFFSET_MUL
 overall_extinction_arr = overall_data_arr[:, 3:3 + num_fourier_dimensions]  
 overall_star_location_arr = overall_data_arr[:, 3 + num_fourier_dimensions:]
 
@@ -523,8 +512,8 @@ log_mean = accumulate(overall_extinction_arr_exp)
 
 
 star_posterior_2d = jnp.exp(log_mean)          
-dx = integrating_dust_x_linspace[1] - integrating_dust_x_linspace[0]
-star_posterior_2d /= (star_posterior_2d.sum(axis=0, keepdims=True) * dx)
+integrating_dx = integrating_dust_x_linspace[1] - integrating_dust_x_linspace[0]
+star_posterior_2d /= (star_posterior_2d.sum(axis=0, keepdims=True) * integrating_dx)
 
 
 x = integrating_dust_x_linspace[:star_posterior_2d.shape[0]]
@@ -735,23 +724,24 @@ axes[5][2].set_title("Offset Trace Plot")
 
 
 fig.tight_layout()
-fig.savefig(out("final_plots.png"), dpi=120, bbox_inches="tight")
+fig.savefig(out("final_plots_wide_offset.png"), dpi=120, bbox_inches="tight")
 
 
-posterior_samples = overall_data_arr[np.newaxis, :, :]  # add chain axis -> (1, num_samples, 50)
+posterior_samples = overall_data_arr[np.newaxis, :, :]  # add chain axis -> (1, num_samples, num_params)
 idata = az.from_dict({"posterior": {"theta": posterior_samples}})
 ess_param_index = 30  
 az.plot_autocorr(idata, var_names="theta", coords={"theta_dim_0": [ess_param_index]})
 
 
-ess_all = az.ess(idata, var_names="theta")  # a Dataset, ESS for all 50 parameters at once
+ess_all = az.ess(idata, var_names="theta")  # a Dataset, ESS for all parameters at once
 indices_of_interest = {"Variance": 0, "Nu": 1, "First mode: ": num_fitting_params, "Second mode: ": num_fitting_params + 1, "10th mode ": num_fitting_params + 9, "100th mode": num_fitting_params + 99, 
                        "Last mode": num_fourier_dimensions + num_fitting_params - 1,  f"Star {star_indices[0]}": star_indices[0] + num_fitting_params + num_fourier_dimensions, f"Star {star_indices[1]}": star_indices[1] + num_fitting_params + num_fourier_dimensions}
-for label, idx in indices_of_interest.items():
-    ess_val = ess_all["theta"].sel(theta_dim_0=idx).values
-    print(f"ESS for {label} parameter (index {idx}): {ess_val}")
+for label, idx_of_interest in indices_of_interest.items():
+    ess_val = ess_all["theta"].sel(theta_dim_0=idx_of_interest).values
+    print(f"ESS for {label} parameter (index {idx_of_interest}): {ess_val}")
 
 
+print(f"Seed: {SEED} Run tag: {RUN_TAG or '(none)'} Output dir: {OUTPUT_DIR}")
 print(f"inv_gamma alpha: {inv_gamma_variance_prior_alpha} beta: {inv_gamma_variance_prior_beta} "
       f"-> student_t nu: {student_t_nu} sigma: {student_t_sigma}")
 print(f"Use NUTS? {use_NUTS} Use blackjax HMC? {use_blackjax_hmc} Initial Step Size: {initial_step_size} Step Size: {step_size} Num integration steps (only valid if no NUTS) {num_integration_steps} Burn in: {burn_in}")
@@ -764,4 +754,7 @@ print(f"Average chi_2 statistic based on the prior: {jnp.average(prior_variances
 print(f"Average chi_2 statistic based on the extinction per star: {average_chi_2_based_on_extinction(overall_star_location_arr, y_obs, dust_x_linspace, overall_extinction_arr_exp, inv_cov_data_matrix)}")
 print(f"Average chi_2 statistic based on the distance/parallax per star: {average_chi_2_based_on_r(overall_star_location_arr, plx_obs, inv_cov_plx_matrix)}")
 
-plt.close()
+if SHOW_PLOTS:
+    plt.show()
+else:
+    plt.close("all")

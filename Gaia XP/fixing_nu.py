@@ -23,32 +23,27 @@ from jax.scipy.special import gammaln
 from jax.scipy.stats import norm
 
 
-
-#INV_GAMMA_MEAN = 9.0
-#INV_GAMMA_VAR  = 81.0
 inv_gamma_variance_prior_alpha = jnp.exp(0.1251910775899887)
 inv_gamma_variance_prior_beta  = jnp.exp(1.294155478477478)
-#INV_GAMMA_MEAN = float(os.environ.get("IG_MEAN", 4))
-#INV_GAMMA_VAR  = float(os.environ.get("IG_VAR", 16))
-#inv_gamma_variance_prior_alpha = INV_GAMMA_MEAN**2/INV_GAMMA_VAR + 2
-#inv_gamma_variance_prior_beta = INV_GAMMA_MEAN**3/INV_GAMMA_VAR + INV_GAMMA_MEAN
-
-#inv_gamma_variance_prior_alpha = 1.5
-#inv_gamma_variance_prior_alpha = float(os.environ.get("IG_ALPHA", 1.5))
-#inv_gamma_variance_prior_beta = 2
 
 from hmc_dust import DATA, GAIA
 
 CHAIN = int(os.environ.get("SLURM_ARRAY_TASK_ID", 0))
 RUN = os.environ.get("SLURM_ARRAY_JOB_ID", os.environ.get("SLURM_JOB_ID", "local"))
 
+# ---- nu sweep ------------------------------------------------------------
+# The sbatch loop sets NU_INDEX to 0..4; this indexes into NU_VALUES.
+NU_VALUES = [0.25, 0.5, 1.0, 1.5, 2.0]
+NU_INDEX = int(os.environ.get("NU_INDEX", 2))   # default -> log(1.0)
+FIXED_NU = NU_VALUES[NU_INDEX]
+FIXED_LOGNU = jnp.log(FIXED_NU)
+NU_TAG = f"nu{FIXED_NU:g}"
+print(f"NU_INDEX={NU_INDEX}  FIXED_NU={FIXED_NU}  FIXED_LOGNU={float(FIXED_LOGNU)}")
+
+
 def out(name):
     root, ext = os.path.splitext(name)
-    return f"{root}_{RUN}_chain{CHAIN}{ext}"
-
-#def out(name):
-    #root, ext = os.path.splitext(name)
-    #return f"{root}_mean{INV_GAMMA_MEAN:g}_var{INV_GAMMA_VAR:g}_{RUN}{ext}"
+    return f"{root}_{NU_TAG}_{RUN}_chain{CHAIN}{ext}"
 
 fits_table = Table.read(GAIA / "gc_sightline.fits")
 
@@ -208,8 +203,8 @@ def mask_cov_diagonal(cov, indices_to_keep):
     M_diag[indices_to_keep] = cov_diag[indices_to_keep]
     return jnp.diag(M_diag)
 
-num_overall_steps = 1100
-burn_in = 100
+num_overall_steps = 550
+burn_in = 50
 num_integration_steps = 3000
 initial_step_size = 0.0004
 step_size = initial_step_size
@@ -326,7 +321,9 @@ def logoffsetprior(offset):
 
 def negative_logdensity(x):
     logvar = x[0]
-    lognu = x[1]
+    #lognu = x[1]
+    lognu = FIXED_LOGNU
+    lognu_unused = x[1] 
     offset = x[2]
     xi = x[3:3 + num_fourier_dimensions]
     r = x[3 + num_fourier_dimensions:]
@@ -334,7 +331,7 @@ def negative_logdensity(x):
     #r = x_obs_true
     inference_params = (logvar, lognu)
     # There are priors on everything: logvar, lognu, offset, xi, and r
-    negative_log_p_s = -logvarprior(logvar) - lognuprior(lognu) - logoffsetprior(offset) + 0.5*xi.T @ xi - jnp.sum(distance_logprior(r))
+    negative_log_p_s = -logvarprior(logvar) - lognuprior(lognu_unused) - logoffsetprior(offset) + 0.5*xi.T @ xi - jnp.sum(distance_logprior(r))
     field_res = y_obs - response_function(xi, r, inference_params, offset)
     plx_res = plx_obs - dist_to_plx(r)
 
@@ -432,12 +429,12 @@ else :
 
 
 
-np.save(out('overall_data_Gaia_XP_fitting_actual_data.npy'), overall_data_arr)
-np.save(out('accept_prob_Gaia_XP_fitting_actual_data.npy'), accept_prob_arr)
+np.save(out('overall_data_fixing_nu.npy'), overall_data_arr)
 
 #%%
 logvars = overall_data_arr[:, 0]
-lognus = overall_data_arr[:, 1]
+#lognus = overall_data_arr[:, 1]
+lognus = jnp.ones_like(logvars)*FIXED_LOGNU
 offsets = overall_data_arr[:, 2]
 overall_extinction_arr = overall_data_arr[:, 3:3 + num_fourier_dimensions]  
 overall_star_location_arr = overall_data_arr[:, 3 + num_fourier_dimensions:]
@@ -570,7 +567,6 @@ if use_NUTS or use_blackjax_hmc:
 
 
 fig.tight_layout()
-fig.savefig(out("covariance_plots.png"), dpi=120, bbox_inches="tight")
 #%%
 fig, axes = plt.subplots(12, 3, figsize = (24, 60))
 star_indices = jnp.arange(num_data)
@@ -735,7 +731,7 @@ axes[5][2].set_title("Offset Trace Plot")
 
 
 fig.tight_layout()
-fig.savefig(out("final_plots.png"), dpi=120, bbox_inches="tight")
+fig.savefig(out("final_plots_fixing_nu.png"), dpi=120, bbox_inches="tight")
 
 
 posterior_samples = overall_data_arr[np.newaxis, :, :]  # add chain axis -> (1, num_samples, 50)
