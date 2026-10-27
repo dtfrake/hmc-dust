@@ -34,7 +34,7 @@ RUN = os.environ.get("SLURM_ARRAY_JOB_ID", os.environ.get("SLURM_JOB_ID", "local
 # ---- nu sweep ------------------------------------------------------------
 # The sbatch loop sets NU_INDEX to 0..4; this indexes into NU_VALUES.
 NU_VALUES = [0.25, 0.5, 1.0, 1.5, 2.0]
-NU_INDEX = int(os.environ.get("NU_INDEX", 2))   # default -> log(1.0)
+NU_INDEX = int(os.environ.get("NU_INDEX", 4))   # default -> log(1.0)
 FIXED_NU = NU_VALUES[NU_INDEX]
 FIXED_LOGNU = jnp.log(FIXED_NU)
 NU_TAG = f"nu{FIXED_NU:g}"
@@ -203,10 +203,10 @@ def mask_cov_diagonal(cov, indices_to_keep):
     M_diag[indices_to_keep] = cov_diag[indices_to_keep]
     return jnp.diag(M_diag)
 
-num_overall_steps = 550
+num_overall_steps = 350
 burn_in = 50
-num_integration_steps = 3000
-initial_step_size = 0.0004
+num_integration_steps = 10000
+initial_step_size = 0.0001
 step_size = initial_step_size
 inv_mass_matrix = jnp.eye(num_fourier_dimensions + num_fitting_params + num_data)
 

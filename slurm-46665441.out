@@ -1,0 +1,69 @@
+/home/users/dtfrake/hmc-dust/.venv/lib/python3.12/site-packages/dustmaps/config.py:74: ConfigWarning: Configuration file not found:
+
+    /home/users/dtfrake/.dustmapsrc
+
+To create a new configuration file in the default location, run the following python code:
+
+    from dustmaps.config import config
+    config.reset()
+
+Note that this will delete your configuration! For example, if you have specified a data directory, then dustmaps will forget about its location.
+  warn(('Configuration file not found:\n\n'
+/home/users/dtfrake/hmc-dust/.venv/lib/python3.12/site-packages/jaxopt/_src/osqp.py:299: SyntaxWarning: invalid escape sequence '\m'
+  """Operator Splitting Solver for Quadratic Programs.
+<Table length=54602>
+     name       dtype 
+-------------- -------
+gdr3_source_id   int64
+            ra float32
+           dec float32
+      parallax float32
+  parallax_err float32
+           ext float32
+       ext_err float32
+        teff_K float32
+           feh float32
+          logg float32
+  plx_over_err float32
+    sep_gc_deg float64
+None
+Filename: /scratch/users/dtfrake/hmc-dust-data/Data_And_Samplers/mean_and_std_healpix.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU       9   ()      
+  1  MEAN          1 ImageHDU        19   (786432, 516)   float32   
+  2  STD.          1 ImageHDU        19   (786432, 516)   float32   
+  3  RADIAL PIXEL CENTERS    1 BinTableHDU     20   516R x 1C   [E]   
+  4  RADIAL PIXEL BOUNDARIES    1 BinTableHDU     20   517R x 1C   [E]   
+  5  MEAN OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+  6  STD. OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+NEST
+NEST
+Max distance is: 1848.10009765625
+Min distance is 28.618728637695312
+HMC set up!
+HMC sample 5/40
+HMC sample 10/40
+HMC sample 15/40
+HMC sample 20/40
+HMC sample 25/40
+HMC sample 30/40
+HMC sample 35/40
+HMC sample 40/40
+ESS for Variance parameter (index 0): 2.349491709297448
+ESS for Nu parameter (index 1): 6.1355888063227
+ESS for First mode:  parameter (index 3): 19.527923472745698
+ESS for Second mode:  parameter (index 4): 8.841618883518422
+ESS for 10th mode  parameter (index 12): 6.934578589010978
+ESS for 100th mode parameter (index 102): 10.149136188142808
+ESS for Last mode parameter (index 602): 18.781460603924273
+ESS for Star 0 parameter (index 603): 5.1331213736007895
+ESS for Star 2 parameter (index 605): 3.0428975022761002
+inv_gamma alpha: 1.133364993029646 beta: 3.6479139310715016 -> student_t nu: 2.266729986059292 sigma: 1.7940617806957684
+Use NUTS? False Use blackjax HMC? False Initial Step Size: 0.0008 Step Size: 0.0008 Num integration steps (only valid if no NUTS) 1500 Burn in: 0
+Average acceptance probability (acceptance rate) is: 0.5618027391904542
+Num dimensions: 600 Num data: 1657 Total length: 1819.4813232421875 Noise on each point: 0.025 Num HMC trials: 40
+Error bars on data: 0.025
+Logvar prior mean: 4.0 Lognu prior mean: 0.0 Offset prior mean -7.6 Initial logvar/lognu/offset values: 4.0, 0, -7.6
+Average chi_2 statistic based on the prior: 0.9104068774536761
+Average chi_2 statistic based on the extinction per star: 20.143497063505198
+Average chi_2 statistic based on the distance/parallax per star: 1.198128069157578

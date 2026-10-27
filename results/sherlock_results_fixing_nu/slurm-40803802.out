@@ -1,0 +1,805 @@
+===== NU_INDEX=0  start 2026-08-25 18:07:06 =====
+NU_INDEX=0  FIXED_NU=0.25  FIXED_LOGNU=-1.3862943649291992
+<Table length=54602>
+     name       dtype 
+-------------- -------
+gdr3_source_id   int64
+            ra float32
+           dec float32
+      parallax float32
+  parallax_err float32
+           ext float32
+       ext_err float32
+        teff_K float32
+           feh float32
+          logg float32
+  plx_over_err float32
+    sep_gc_deg float64
+None
+Filename: /scratch/users/dtfrake/hmc-dust-data/Data_And_Samplers/mean_and_std_healpix.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU       9   ()      
+  1  MEAN          1 ImageHDU        19   (786432, 516)   float32   
+  2  STD.          1 ImageHDU        19   (786432, 516)   float32   
+  3  RADIAL PIXEL CENTERS    1 BinTableHDU     20   516R x 1C   [E]   
+  4  RADIAL PIXEL BOUNDARIES    1 BinTableHDU     20   517R x 1C   [E]   
+  5  MEAN OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+  6  STD. OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+NEST
+NEST
+Max distance is: 1848.10009765625
+Min distance is 28.618728637695312
+HMC set up!
+HMC sample 5/550
+HMC sample 10/550
+HMC sample 15/550
+HMC sample 20/550
+HMC sample 25/550
+HMC sample 30/550
+HMC sample 35/550
+HMC sample 40/550
+HMC sample 45/550
+HMC sample 50/550
+HMC sample 55/550
+HMC sample 60/550
+HMC sample 65/550
+HMC sample 70/550
+HMC sample 75/550
+HMC sample 80/550
+HMC sample 85/550
+HMC sample 90/550
+HMC sample 95/550
+HMC sample 100/550
+HMC sample 105/550
+HMC sample 110/550
+HMC sample 115/550
+HMC sample 120/550
+HMC sample 125/550
+HMC sample 130/550
+HMC sample 135/550
+HMC sample 140/550
+HMC sample 145/550
+HMC sample 150/550
+HMC sample 155/550
+HMC sample 160/550
+HMC sample 165/550
+HMC sample 170/550
+HMC sample 175/550
+HMC sample 180/550
+HMC sample 185/550
+HMC sample 190/550
+HMC sample 195/550
+HMC sample 200/550
+HMC sample 205/550
+HMC sample 210/550
+HMC sample 215/550
+HMC sample 220/550
+HMC sample 225/550
+HMC sample 230/550
+HMC sample 235/550
+HMC sample 240/550
+HMC sample 245/550
+HMC sample 250/550
+HMC sample 255/550
+HMC sample 260/550
+HMC sample 265/550
+HMC sample 270/550
+HMC sample 275/550
+HMC sample 280/550
+HMC sample 285/550
+HMC sample 290/550
+HMC sample 295/550
+HMC sample 300/550
+HMC sample 305/550
+HMC sample 310/550
+HMC sample 315/550
+HMC sample 320/550
+HMC sample 325/550
+HMC sample 330/550
+HMC sample 335/550
+HMC sample 340/550
+HMC sample 345/550
+HMC sample 350/550
+HMC sample 355/550
+HMC sample 360/550
+HMC sample 365/550
+HMC sample 370/550
+HMC sample 375/550
+HMC sample 380/550
+HMC sample 385/550
+HMC sample 390/550
+HMC sample 395/550
+HMC sample 400/550
+HMC sample 405/550
+HMC sample 410/550
+HMC sample 415/550
+HMC sample 420/550
+HMC sample 425/550
+HMC sample 430/550
+HMC sample 435/550
+HMC sample 440/550
+HMC sample 445/550
+HMC sample 450/550
+HMC sample 455/550
+HMC sample 460/550
+HMC sample 465/550
+HMC sample 470/550
+HMC sample 475/550
+HMC sample 480/550
+HMC sample 485/550
+HMC sample 490/550
+HMC sample 495/550
+HMC sample 500/550
+HMC sample 505/550
+HMC sample 510/550
+HMC sample 515/550
+HMC sample 520/550
+HMC sample 525/550
+HMC sample 530/550
+HMC sample 535/550
+HMC sample 540/550
+HMC sample 545/550
+HMC sample 550/550
+ESS for Variance parameter (index 0): 99.24159575131723
+ESS for Nu parameter (index 1): 171.20995994533922
+ESS for First mode:  parameter (index 3): 165.67172109829272
+ESS for Second mode:  parameter (index 4): 199.074348019902
+ESS for 10th mode  parameter (index 12): 229.3659244754062
+ESS for 100th mode parameter (index 102): 244.07685180627814
+ESS for Last mode parameter (index 6002): 145.97428705545815
+ESS for Star 0 parameter (index 6003): 161.55050031640278
+ESS for Star 2 parameter (index 6005): 194.10986656107795
+inv_gamma alpha: 1.1333650350570679 beta: 3.647913932800293 -> student_t nu: 2.2667300701141357 sigma: 1.7940617799758911
+Use NUTS? False Use blackjax HMC? False Initial Step Size: 0.0004 Step Size: 0.0004 Num integration steps (only valid if no NUTS) 3000 Burn in: 50
+Average acceptance probability (acceptance rate) is: 0.8756396174430847
+Num dimensions: 600 Num data: 1657 Total length: 1819.4813232421875 Noise on each point: 0.025 Num HMC trials: 550
+Error bars on data: 0.025
+Logvar prior mean: 4.0 Lognu prior mean: 0.0 Offset prior mean -7.6 Initial logvar/lognu/offset values: 4.0, 0, -7.6
+Average chi_2 statistic based on the prior: 0.9920516014099121
+Average chi_2 statistic based on the extinction per star: 19.285106658935547
+Average chi_2 statistic based on the distance/parallax per star: 1.2271814346313477
+===== NU_INDEX=0  done  2026-08-25 21:08:54 =====
+===== NU_INDEX=1  start 2026-08-25 21:08:54 =====
+NU_INDEX=1  FIXED_NU=0.5  FIXED_LOGNU=-0.6931471824645996
+<Table length=54602>
+     name       dtype 
+-------------- -------
+gdr3_source_id   int64
+            ra float32
+           dec float32
+      parallax float32
+  parallax_err float32
+           ext float32
+       ext_err float32
+        teff_K float32
+           feh float32
+          logg float32
+  plx_over_err float32
+    sep_gc_deg float64
+None
+Filename: /scratch/users/dtfrake/hmc-dust-data/Data_And_Samplers/mean_and_std_healpix.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU       9   ()      
+  1  MEAN          1 ImageHDU        19   (786432, 516)   float32   
+  2  STD.          1 ImageHDU        19   (786432, 516)   float32   
+  3  RADIAL PIXEL CENTERS    1 BinTableHDU     20   516R x 1C   [E]   
+  4  RADIAL PIXEL BOUNDARIES    1 BinTableHDU     20   517R x 1C   [E]   
+  5  MEAN OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+  6  STD. OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+NEST
+NEST
+Max distance is: 1848.10009765625
+Min distance is 28.618728637695312
+HMC set up!
+HMC sample 5/550
+HMC sample 10/550
+HMC sample 15/550
+HMC sample 20/550
+HMC sample 25/550
+HMC sample 30/550
+HMC sample 35/550
+HMC sample 40/550
+HMC sample 45/550
+HMC sample 50/550
+HMC sample 55/550
+HMC sample 60/550
+HMC sample 65/550
+HMC sample 70/550
+HMC sample 75/550
+HMC sample 80/550
+HMC sample 85/550
+HMC sample 90/550
+HMC sample 95/550
+HMC sample 100/550
+HMC sample 105/550
+HMC sample 110/550
+HMC sample 115/550
+HMC sample 120/550
+HMC sample 125/550
+HMC sample 130/550
+HMC sample 135/550
+HMC sample 140/550
+HMC sample 145/550
+HMC sample 150/550
+HMC sample 155/550
+HMC sample 160/550
+HMC sample 165/550
+HMC sample 170/550
+HMC sample 175/550
+HMC sample 180/550
+HMC sample 185/550
+HMC sample 190/550
+HMC sample 195/550
+HMC sample 200/550
+HMC sample 205/550
+HMC sample 210/550
+HMC sample 215/550
+HMC sample 220/550
+HMC sample 225/550
+HMC sample 230/550
+HMC sample 235/550
+HMC sample 240/550
+HMC sample 245/550
+HMC sample 250/550
+HMC sample 255/550
+HMC sample 260/550
+HMC sample 265/550
+HMC sample 270/550
+HMC sample 275/550
+HMC sample 280/550
+HMC sample 285/550
+HMC sample 290/550
+HMC sample 295/550
+HMC sample 300/550
+HMC sample 305/550
+HMC sample 310/550
+HMC sample 315/550
+HMC sample 320/550
+HMC sample 325/550
+HMC sample 330/550
+HMC sample 335/550
+HMC sample 340/550
+HMC sample 345/550
+HMC sample 350/550
+HMC sample 355/550
+HMC sample 360/550
+HMC sample 365/550
+HMC sample 370/550
+HMC sample 375/550
+HMC sample 380/550
+HMC sample 385/550
+HMC sample 390/550
+HMC sample 395/550
+HMC sample 400/550
+HMC sample 405/550
+HMC sample 410/550
+HMC sample 415/550
+HMC sample 420/550
+HMC sample 425/550
+HMC sample 430/550
+HMC sample 435/550
+HMC sample 440/550
+HMC sample 445/550
+HMC sample 450/550
+HMC sample 455/550
+HMC sample 460/550
+HMC sample 465/550
+HMC sample 470/550
+HMC sample 475/550
+HMC sample 480/550
+HMC sample 485/550
+HMC sample 490/550
+HMC sample 495/550
+HMC sample 500/550
+HMC sample 505/550
+HMC sample 510/550
+HMC sample 515/550
+HMC sample 520/550
+HMC sample 525/550
+HMC sample 530/550
+HMC sample 535/550
+HMC sample 540/550
+HMC sample 545/550
+HMC sample 550/550
+ESS for Variance parameter (index 0): 6.9857993077745135
+ESS for Nu parameter (index 1): 110.57957355639178
+ESS for First mode:  parameter (index 3): 115.52482945793055
+ESS for Second mode:  parameter (index 4): 110.39514383194721
+ESS for 10th mode  parameter (index 12): 130.72892699000016
+ESS for 100th mode parameter (index 102): 47.694032436567554
+ESS for Last mode parameter (index 6002): 55.35748118361628
+ESS for Star 0 parameter (index 6003): 5.53501911851087
+ESS for Star 2 parameter (index 6005): 32.34891693571251
+inv_gamma alpha: 1.1333650350570679 beta: 3.647913932800293 -> student_t nu: 2.2667300701141357 sigma: 1.7940617799758911
+Use NUTS? False Use blackjax HMC? False Initial Step Size: 0.0004 Step Size: 0.0004 Num integration steps (only valid if no NUTS) 3000 Burn in: 50
+Average acceptance probability (acceptance rate) is: 0.4832557439804077
+Num dimensions: 600 Num data: 1657 Total length: 1819.4813232421875 Noise on each point: 0.025 Num HMC trials: 550
+Error bars on data: 0.025
+Logvar prior mean: 4.0 Lognu prior mean: 0.0 Offset prior mean -7.6 Initial logvar/lognu/offset values: 4.0, 0, -7.6
+Average chi_2 statistic based on the prior: 0.9668078422546387
+Average chi_2 statistic based on the extinction per star: 19.426198959350586
+Average chi_2 statistic based on the distance/parallax per star: 1.2206308841705322
+===== NU_INDEX=1  done  2026-08-26 00:09:18 =====
+===== NU_INDEX=2  start 2026-08-26 00:09:18 =====
+NU_INDEX=2  FIXED_NU=1.0  FIXED_LOGNU=0.0
+<Table length=54602>
+     name       dtype 
+-------------- -------
+gdr3_source_id   int64
+            ra float32
+           dec float32
+      parallax float32
+  parallax_err float32
+           ext float32
+       ext_err float32
+        teff_K float32
+           feh float32
+          logg float32
+  plx_over_err float32
+    sep_gc_deg float64
+None
+Filename: /scratch/users/dtfrake/hmc-dust-data/Data_And_Samplers/mean_and_std_healpix.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU       9   ()      
+  1  MEAN          1 ImageHDU        19   (786432, 516)   float32   
+  2  STD.          1 ImageHDU        19   (786432, 516)   float32   
+  3  RADIAL PIXEL CENTERS    1 BinTableHDU     20   516R x 1C   [E]   
+  4  RADIAL PIXEL BOUNDARIES    1 BinTableHDU     20   517R x 1C   [E]   
+  5  MEAN OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+  6  STD. OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+NEST
+NEST
+Max distance is: 1848.10009765625
+Min distance is 28.618728637695312
+HMC set up!
+HMC sample 5/550
+HMC sample 10/550
+HMC sample 15/550
+HMC sample 20/550
+HMC sample 25/550
+HMC sample 30/550
+HMC sample 35/550
+HMC sample 40/550
+HMC sample 45/550
+HMC sample 50/550
+HMC sample 55/550
+HMC sample 60/550
+HMC sample 65/550
+HMC sample 70/550
+HMC sample 75/550
+HMC sample 80/550
+HMC sample 85/550
+HMC sample 90/550
+HMC sample 95/550
+HMC sample 100/550
+HMC sample 105/550
+HMC sample 110/550
+HMC sample 115/550
+HMC sample 120/550
+HMC sample 125/550
+HMC sample 130/550
+HMC sample 135/550
+HMC sample 140/550
+HMC sample 145/550
+HMC sample 150/550
+HMC sample 155/550
+HMC sample 160/550
+HMC sample 165/550
+HMC sample 170/550
+HMC sample 175/550
+HMC sample 180/550
+HMC sample 185/550
+HMC sample 190/550
+HMC sample 195/550
+HMC sample 200/550
+HMC sample 205/550
+HMC sample 210/550
+HMC sample 215/550
+HMC sample 220/550
+HMC sample 225/550
+HMC sample 230/550
+HMC sample 235/550
+HMC sample 240/550
+HMC sample 245/550
+HMC sample 250/550
+HMC sample 255/550
+HMC sample 260/550
+HMC sample 265/550
+HMC sample 270/550
+HMC sample 275/550
+HMC sample 280/550
+HMC sample 285/550
+HMC sample 290/550
+HMC sample 295/550
+HMC sample 300/550
+HMC sample 305/550
+HMC sample 310/550
+HMC sample 315/550
+HMC sample 320/550
+HMC sample 325/550
+HMC sample 330/550
+HMC sample 335/550
+HMC sample 340/550
+HMC sample 345/550
+HMC sample 350/550
+HMC sample 355/550
+HMC sample 360/550
+HMC sample 365/550
+HMC sample 370/550
+HMC sample 375/550
+HMC sample 380/550
+HMC sample 385/550
+HMC sample 390/550
+HMC sample 395/550
+HMC sample 400/550
+HMC sample 405/550
+HMC sample 410/550
+HMC sample 415/550
+HMC sample 420/550
+HMC sample 425/550
+HMC sample 430/550
+HMC sample 435/550
+HMC sample 440/550
+HMC sample 445/550
+HMC sample 450/550
+HMC sample 455/550
+HMC sample 460/550
+HMC sample 465/550
+HMC sample 470/550
+HMC sample 475/550
+HMC sample 480/550
+HMC sample 485/550
+HMC sample 490/550
+HMC sample 495/550
+HMC sample 500/550
+HMC sample 505/550
+HMC sample 510/550
+HMC sample 515/550
+HMC sample 520/550
+HMC sample 525/550
+HMC sample 530/550
+HMC sample 535/550
+HMC sample 540/550
+HMC sample 545/550
+HMC sample 550/550
+ESS for Variance parameter (index 0): 26.691653813685676
+ESS for Nu parameter (index 1): 5.021342903205245
+ESS for First mode:  parameter (index 3): 13.085041076093857
+ESS for Second mode:  parameter (index 4): 9.508095501779664
+ESS for 10th mode  parameter (index 12): 18.914045136858615
+ESS for 100th mode parameter (index 102): 4.670769931234152
+ESS for Last mode parameter (index 6002): 2.8666315347677673
+ESS for Star 0 parameter (index 6003): 13.7687292564122
+ESS for Star 2 parameter (index 6005): 46.98757869455727
+inv_gamma alpha: 1.1333650350570679 beta: 3.647913932800293 -> student_t nu: 2.2667300701141357 sigma: 1.7940617799758911
+Use NUTS? False Use blackjax HMC? False Initial Step Size: 0.0004 Step Size: 0.0004 Num integration steps (only valid if no NUTS) 3000 Burn in: 50
+Average acceptance probability (acceptance rate) is: 0.12727117538452148
+Num dimensions: 600 Num data: 1657 Total length: 1819.4813232421875 Noise on each point: 0.025 Num HMC trials: 550
+Error bars on data: 0.025
+Logvar prior mean: 4.0 Lognu prior mean: 0.0 Offset prior mean -7.6 Initial logvar/lognu/offset values: 4.0, 0, -7.6
+Average chi_2 statistic based on the prior: 0.9124337434768677
+Average chi_2 statistic based on the extinction per star: 19.929157257080078
+Average chi_2 statistic based on the distance/parallax per star: 1.2293190956115723
+===== NU_INDEX=2  done  2026-08-26 03:09:50 =====
+===== NU_INDEX=3  start 2026-08-26 03:09:50 =====
+NU_INDEX=3  FIXED_NU=1.5  FIXED_LOGNU=0.40546509623527527
+<Table length=54602>
+     name       dtype 
+-------------- -------
+gdr3_source_id   int64
+            ra float32
+           dec float32
+      parallax float32
+  parallax_err float32
+           ext float32
+       ext_err float32
+        teff_K float32
+           feh float32
+          logg float32
+  plx_over_err float32
+    sep_gc_deg float64
+None
+Filename: /scratch/users/dtfrake/hmc-dust-data/Data_And_Samplers/mean_and_std_healpix.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU       9   ()      
+  1  MEAN          1 ImageHDU        19   (786432, 516)   float32   
+  2  STD.          1 ImageHDU        19   (786432, 516)   float32   
+  3  RADIAL PIXEL CENTERS    1 BinTableHDU     20   516R x 1C   [E]   
+  4  RADIAL PIXEL BOUNDARIES    1 BinTableHDU     20   517R x 1C   [E]   
+  5  MEAN OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+  6  STD. OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+NEST
+NEST
+Max distance is: 1848.10009765625
+Min distance is 28.618728637695312
+HMC set up!
+HMC sample 5/550
+HMC sample 10/550
+HMC sample 15/550
+HMC sample 20/550
+HMC sample 25/550
+HMC sample 30/550
+HMC sample 35/550
+HMC sample 40/550
+HMC sample 45/550
+HMC sample 50/550
+HMC sample 55/550
+HMC sample 60/550
+HMC sample 65/550
+HMC sample 70/550
+HMC sample 75/550
+HMC sample 80/550
+HMC sample 85/550
+HMC sample 90/550
+HMC sample 95/550
+HMC sample 100/550
+HMC sample 105/550
+HMC sample 110/550
+HMC sample 115/550
+HMC sample 120/550
+HMC sample 125/550
+HMC sample 130/550
+HMC sample 135/550
+HMC sample 140/550
+HMC sample 145/550
+HMC sample 150/550
+HMC sample 155/550
+HMC sample 160/550
+HMC sample 165/550
+HMC sample 170/550
+HMC sample 175/550
+HMC sample 180/550
+HMC sample 185/550
+HMC sample 190/550
+HMC sample 195/550
+HMC sample 200/550
+HMC sample 205/550
+HMC sample 210/550
+HMC sample 215/550
+HMC sample 220/550
+HMC sample 225/550
+HMC sample 230/550
+HMC sample 235/550
+HMC sample 240/550
+HMC sample 245/550
+HMC sample 250/550
+HMC sample 255/550
+HMC sample 260/550
+HMC sample 265/550
+HMC sample 270/550
+HMC sample 275/550
+HMC sample 280/550
+HMC sample 285/550
+HMC sample 290/550
+HMC sample 295/550
+HMC sample 300/550
+HMC sample 305/550
+HMC sample 310/550
+HMC sample 315/550
+HMC sample 320/550
+HMC sample 325/550
+HMC sample 330/550
+HMC sample 335/550
+HMC sample 340/550
+HMC sample 345/550
+HMC sample 350/550
+HMC sample 355/550
+HMC sample 360/550
+HMC sample 365/550
+HMC sample 370/550
+HMC sample 375/550
+HMC sample 380/550
+HMC sample 385/550
+HMC sample 390/550
+HMC sample 395/550
+HMC sample 400/550
+HMC sample 405/550
+HMC sample 410/550
+HMC sample 415/550
+HMC sample 420/550
+HMC sample 425/550
+HMC sample 430/550
+HMC sample 435/550
+HMC sample 440/550
+HMC sample 445/550
+HMC sample 450/550
+HMC sample 455/550
+HMC sample 460/550
+HMC sample 465/550
+HMC sample 470/550
+HMC sample 475/550
+HMC sample 480/550
+HMC sample 485/550
+HMC sample 490/550
+HMC sample 495/550
+HMC sample 500/550
+HMC sample 505/550
+HMC sample 510/550
+HMC sample 515/550
+HMC sample 520/550
+HMC sample 525/550
+HMC sample 530/550
+HMC sample 535/550
+HMC sample 540/550
+HMC sample 545/550
+HMC sample 550/550
+ESS for Variance parameter (index 0): 10.520038667732438
+ESS for Nu parameter (index 1): 45.924216731525995
+ESS for First mode:  parameter (index 3): 48.66463750432754
+ESS for Second mode:  parameter (index 4): 3.7667404114063294
+ESS for 10th mode  parameter (index 12): 13.879160722744743
+ESS for 100th mode parameter (index 102): 15.229276956821726
+ESS for Last mode parameter (index 6002): 3.622755402250487
+ESS for Star 0 parameter (index 6003): 7.201093820006709
+ESS for Star 2 parameter (index 6005): 8.558925660134541
+inv_gamma alpha: 1.1333650350570679 beta: 3.647913932800293 -> student_t nu: 2.2667300701141357 sigma: 1.7940617799758911
+Use NUTS? False Use blackjax HMC? False Initial Step Size: 0.0004 Step Size: 0.0004 Num integration steps (only valid if no NUTS) 3000 Burn in: 50
+Average acceptance probability (acceptance rate) is: 0.054651472717523575
+Num dimensions: 600 Num data: 1657 Total length: 1819.4813232421875 Noise on each point: 0.025 Num HMC trials: 550
+Error bars on data: 0.025
+Logvar prior mean: 4.0 Lognu prior mean: 0.0 Offset prior mean -7.6 Initial logvar/lognu/offset values: 4.0, 0, -7.6
+Average chi_2 statistic based on the prior: 0.6832485795021057
+Average chi_2 statistic based on the extinction per star: 20.827342987060547
+Average chi_2 statistic based on the distance/parallax per star: 1.2128604650497437
+===== NU_INDEX=3  done  2026-08-26 06:09:59 =====
+===== NU_INDEX=4  start 2026-08-26 06:09:59 =====
+NU_INDEX=4  FIXED_NU=2.0  FIXED_LOGNU=0.6931471824645996
+<Table length=54602>
+     name       dtype 
+-------------- -------
+gdr3_source_id   int64
+            ra float32
+           dec float32
+      parallax float32
+  parallax_err float32
+           ext float32
+       ext_err float32
+        teff_K float32
+           feh float32
+          logg float32
+  plx_over_err float32
+    sep_gc_deg float64
+None
+Filename: /scratch/users/dtfrake/hmc-dust-data/Data_And_Samplers/mean_and_std_healpix.fits
+No.    Name      Ver    Type      Cards   Dimensions   Format
+  0  PRIMARY       1 PrimaryHDU       9   ()      
+  1  MEAN          1 ImageHDU        19   (786432, 516)   float32   
+  2  STD.          1 ImageHDU        19   (786432, 516)   float32   
+  3  RADIAL PIXEL CENTERS    1 BinTableHDU     20   516R x 1C   [E]   
+  4  RADIAL PIXEL BOUNDARIES    1 BinTableHDU     20   517R x 1C   [E]   
+  5  MEAN OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+  6  STD. OF INTEGRATED INNER 68.8 PC    1 ImageHDU        16   (786432,)   float32   
+NEST
+NEST
+Max distance is: 1848.10009765625
+Min distance is 28.618728637695312
+HMC set up!
+HMC sample 5/550
+HMC sample 10/550
+HMC sample 15/550
+HMC sample 20/550
+HMC sample 25/550
+HMC sample 30/550
+HMC sample 35/550
+HMC sample 40/550
+HMC sample 45/550
+HMC sample 50/550
+HMC sample 55/550
+HMC sample 60/550
+HMC sample 65/550
+HMC sample 70/550
+HMC sample 75/550
+HMC sample 80/550
+HMC sample 85/550
+HMC sample 90/550
+HMC sample 95/550
+HMC sample 100/550
+HMC sample 105/550
+HMC sample 110/550
+HMC sample 115/550
+HMC sample 120/550
+HMC sample 125/550
+HMC sample 130/550
+HMC sample 135/550
+HMC sample 140/550
+HMC sample 145/550
+HMC sample 150/550
+HMC sample 155/550
+HMC sample 160/550
+HMC sample 165/550
+HMC sample 170/550
+HMC sample 175/550
+HMC sample 180/550
+HMC sample 185/550
+HMC sample 190/550
+HMC sample 195/550
+HMC sample 200/550
+HMC sample 205/550
+HMC sample 210/550
+HMC sample 215/550
+HMC sample 220/550
+HMC sample 225/550
+HMC sample 230/550
+HMC sample 235/550
+HMC sample 240/550
+HMC sample 245/550
+HMC sample 250/550
+HMC sample 255/550
+HMC sample 260/550
+HMC sample 265/550
+HMC sample 270/550
+HMC sample 275/550
+HMC sample 280/550
+HMC sample 285/550
+HMC sample 290/550
+HMC sample 295/550
+HMC sample 300/550
+HMC sample 305/550
+HMC sample 310/550
+HMC sample 315/550
+HMC sample 320/550
+HMC sample 325/550
+HMC sample 330/550
+HMC sample 335/550
+HMC sample 340/550
+HMC sample 345/550
+HMC sample 350/550
+HMC sample 355/550
+HMC sample 360/550
+HMC sample 365/550
+HMC sample 370/550
+HMC sample 375/550
+HMC sample 380/550
+HMC sample 385/550
+HMC sample 390/550
+HMC sample 395/550
+HMC sample 400/550
+HMC sample 405/550
+HMC sample 410/550
+HMC sample 415/550
+HMC sample 420/550
+HMC sample 425/550
+HMC sample 430/550
+HMC sample 435/550
+HMC sample 440/550
+HMC sample 445/550
+HMC sample 450/550
+HMC sample 455/550
+HMC sample 460/550
+HMC sample 465/550
+HMC sample 470/550
+HMC sample 475/550
+HMC sample 480/550
+HMC sample 485/550
+HMC sample 490/550
+HMC sample 495/550
+HMC sample 500/550
+HMC sample 505/550
+HMC sample 510/550
+HMC sample 515/550
+HMC sample 520/550
+HMC sample 525/550
+HMC sample 530/550
+HMC sample 535/550
+HMC sample 540/550
+HMC sample 545/550
+HMC sample 550/550
+ESS for Variance parameter (index 0): 2.0796067902017747
+ESS for Nu parameter (index 1): 20.72496364198502
+ESS for First mode:  parameter (index 3): 4.355351577913813
+ESS for Second mode:  parameter (index 4): 3.0029537478132844
+ESS for 10th mode  parameter (index 12): 13.647840619824342
+ESS for 100th mode parameter (index 102): 16.919013802448337
+ESS for Last mode parameter (index 6002): 5.737355871735837
+ESS for Star 0 parameter (index 6003): 5.6687943007399895
+ESS for Star 2 parameter (index 6005): 3.1423015365523637
+inv_gamma alpha: 1.1333650350570679 beta: 3.647913932800293 -> student_t nu: 2.2667300701141357 sigma: 1.7940617799758911
+Use NUTS? False Use blackjax HMC? False Initial Step Size: 0.0004 Step Size: 0.0004 Num integration steps (only valid if no NUTS) 3000 Burn in: 50
+Average acceptance probability (acceptance rate) is: 0.015085676684975624
+Num dimensions: 600 Num data: 1657 Total length: 1819.4813232421875 Noise on each point: 0.025 Num HMC trials: 550
+Error bars on data: 0.025
+Logvar prior mean: 4.0 Lognu prior mean: 0.0 Offset prior mean -7.6 Initial logvar/lognu/offset values: 4.0, 0, -7.6
+Average chi_2 statistic based on the prior: 0.4630296230316162
+Average chi_2 statistic based on the extinction per star: 21.89361000061035
+Average chi_2 statistic based on the distance/parallax per star: 1.2083139419555664
+===== NU_INDEX=4  done  2026-08-26 09:10:02 =====

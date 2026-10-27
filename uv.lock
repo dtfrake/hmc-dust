@@ -657,6 +657,18 @@ wheels = [
 ]
 
 [[package]]
+name = "graphgp"
+version = "0.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jax" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/45/76/37e0eee3e476945f0798b21c867b771dd7618429d179b274241925f93655/graphgp-0.0.2.tar.gz", hash = "sha256:357a0be368764d32b582537e3a4c4e1c54c2b966253125c5fc3751ed0dd73191", size = 92324, upload-time = "2025-12-04T09:48:53.976Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/36/a7/77b86df2ace0d6033870412d5b3813fa46acd49f469b0ad06eab94f3fe9d/graphgp-0.0.2-py3-none-any.whl", hash = "sha256:0ed2343e1aae76dc1056526bcdefd49c2fd32195e4d03600f51f1ed8f0358ae8", size = 14048, upload-time = "2025-12-04T09:48:52.6Z" },
+]
+
+[[package]]
 name = "h11"
 version = "0.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -722,6 +734,7 @@ dependencies = [
     { name = "blackjax" },
     { name = "dustmaps" },
     { name = "fsspec" },
+    { name = "graphgp" },
     { name = "h5py" },
     { name = "healpy" },
     { name = "jax" },
@@ -741,6 +754,7 @@ requires-dist = [
     { name = "blackjax", specifier = ">=1.5" },
     { name = "dustmaps", specifier = ">=1.0.14" },
     { name = "fsspec", specifier = ">=2026.7.0" },
+    { name = "graphgp", specifier = ">=0.0.2" },
     { name = "h5py", specifier = ">=3.16.0" },
     { name = "healpy", specifier = ">=1.19.0" },
     { name = "jax", specifier = ">=0.10.2" },
